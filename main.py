@@ -17,21 +17,17 @@ def scrape_additional_details(product_url, product_name, product_price, product_
         asin = 'None'
         manufacturer = 'None'
         try:
-            print(asin)
-            print(manufacturer)
             table_rows = product_soup.find('table', {'id': 'productDetails_techSpec_section_1'}).find_all('tr')
             for row in table_rows:
                 th = row.find('th', {'class': 'a-color-secondary a-size-base prodDetSectionEntry'})
                 if th:
                     th_text = th.get_text(strip=True)
-                    if th_text == 'ASIN':
+                    if 'ASIN' in th_text:
                         asin_td = row.find('td', {'class': 'a-size-base prodDetAttrValue'})
                         asin = asin_td.get_text(strip=True)
                     elif th_text == 'Manufacturer':
                         manufacturer_td = row.find('td', {'class': 'a-size-base prodDetAttrValue'})
                         manufacturer = manufacturer_td.get_text(strip=True)
-            print(asin)
-            print(manufacturer)
         except:
             pass
     else :
@@ -93,8 +89,6 @@ def scrape_detail(p):
     except:
         num_reviews = 'None'
 
-
-    print (product_url)
     scrape_additional_details(product_url, product_name, product_price, product_rating, num_reviews)
 
 
@@ -111,19 +105,20 @@ def load_page(page_no):
 
     products = soup.find_all('div', {'data-component-type': 's-search-result'})
     for p in products:
-        # print("------------------------------",product_count,"------------------------")
+        print(product_count)
         scrape_detail(p)
         product_count+=1
-
+    print(URL)
     URL = 'https://www.amazon.in' + soup.find('a', {'aria-label': f'Go to page {page_no}'})['href']
 
 page_no = 1
-for i in range(15):
+for i in range(19):
     page_no+=1
     try:
         load_page(page_no)
-    except:
+    except Exception as e:
+        print("Ended due to Exception :",e)
         break
 
 df = pd.DataFrame(data_list)
-df.to_csv('amazon_products.csv', index=False)
+df.to_csv('amazon_products_list.csv', index=False)
